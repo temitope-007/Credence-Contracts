@@ -10,8 +10,8 @@
 //! 7. TTL is capped at MAX_TTL for very long-lived delegations.
 
 use super::*;
-use soroban_sdk::testutils::{Address as _, Ledger as _};
 use soroban_sdk::testutils::storage::Persistent as PersistentTestutils;
+use soroban_sdk::testutils::{Address as _, Ledger as _};
 use soroban_sdk::Env;
 
 use crate::nonce::{LEDGER_BUMP_BUFFER, MAX_TTL, MIN_NONCE_TTL};
@@ -40,7 +40,9 @@ fn advance_time(e: &Env, contract_id: &soroban_sdk::Address, secs: u64) {
     });
     // Keep the contract instance alive across the time advance.
     e.as_contract(contract_id, || {
-        e.storage().instance().extend_ttl(ledgers + 17_280, ledgers + 17_280);
+        e.storage()
+            .instance()
+            .extend_ttl(ledgers + 17_280, ledgers + 17_280);
     });
 }
 
@@ -78,7 +80,10 @@ fn test_delegation_ttl_set_on_write() {
     let ttl = delegation_ttl(&e, &contract_id, &key);
 
     // TTL should be at least LEDGER_BUMP_BUFFER and at most MAX_TTL
-    assert!(ttl >= LEDGER_BUMP_BUFFER, "TTL {ttl} < LEDGER_BUMP_BUFFER {LEDGER_BUMP_BUFFER}");
+    assert!(
+        ttl >= LEDGER_BUMP_BUFFER,
+        "TTL {ttl} < LEDGER_BUMP_BUFFER {LEDGER_BUMP_BUFFER}"
+    );
     assert!(ttl <= MAX_TTL, "TTL {ttl} > MAX_TTL {MAX_TTL}");
 }
 
@@ -175,7 +180,10 @@ fn test_nonce_ttl_set_on_consume() {
 
     let nonce_key = DataKey::Nonce(owner.clone());
     let ttl = nonce_ttl(&e, &contract_id, &nonce_key);
-    assert!(ttl >= MIN_NONCE_TTL, "Nonce TTL {ttl} < MIN_NONCE_TTL {MIN_NONCE_TTL}");
+    assert!(
+        ttl >= MIN_NONCE_TTL,
+        "Nonce TTL {ttl} < MIN_NONCE_TTL {MIN_NONCE_TTL}"
+    );
     assert!(ttl <= MAX_TTL);
 }
 
@@ -214,7 +222,10 @@ fn test_nonce_ttl_covers_delegation_lifetime() {
     let ttl = nonce_ttl(&e, &contract_id, &nonce_key);
 
     // TTL should be at least MIN_NONCE_TTL
-    assert!(ttl >= MIN_NONCE_TTL, "Nonce TTL {ttl} < MIN_NONCE_TTL {MIN_NONCE_TTL}");
+    assert!(
+        ttl >= MIN_NONCE_TTL,
+        "Nonce TTL {ttl} < MIN_NONCE_TTL {MIN_NONCE_TTL}"
+    );
     assert!(ttl <= MAX_TTL);
 }
 
@@ -281,7 +292,10 @@ fn test_delegation_ttl_bumped_on_revoke() {
 
     let key = DataKey::Delegation(owner.clone(), delegate.clone(), DelegationType::Attestation);
     let ttl = delegation_ttl(&e, &contract_id, &key);
-    assert!(ttl >= LEDGER_BUMP_BUFFER, "TTL after revoke {ttl} < LEDGER_BUMP_BUFFER");
+    assert!(
+        ttl >= LEDGER_BUMP_BUFFER,
+        "TTL after revoke {ttl} < LEDGER_BUMP_BUFFER"
+    );
 }
 
 // ---------------------------------------------------------------------------
@@ -303,5 +317,8 @@ fn test_delegation_ttl_capped_at_max() {
 
     let key = DataKey::Delegation(owner.clone(), delegate.clone(), DelegationType::Management);
     let ttl = delegation_ttl(&e, &contract_id, &key);
-    assert_eq!(ttl, MAX_TTL, "TTL {ttl} should be capped at MAX_TTL {MAX_TTL}");
+    assert_eq!(
+        ttl, MAX_TTL,
+        "TTL {ttl} should be capped at MAX_TTL {MAX_TTL}"
+    );
 }

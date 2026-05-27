@@ -59,11 +59,7 @@ fn ttl_for_expiry(e: &Env, expires_at: u64) -> u32 {
 /// # Guarantees
 /// - Called on every read and write of `DataKey::Delegation(owner, delegate, kind)`.
 /// - Prevents archival for the duration of the delegation's validity window.
-pub fn bump_delegation_ttl(
-    e: &Env,
-    key: &DataKey,
-    expires_at: u64,
-) {
+pub fn bump_delegation_ttl(e: &Env, key: &DataKey, expires_at: u64) {
     if !e.storage().persistent().has(key) {
         return;
     }
