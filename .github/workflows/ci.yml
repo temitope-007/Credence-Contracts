@@ -75,3 +75,9 @@ jobs:
 
       - name: Build release (workspace)
         run: cargo build --release
+
+      - name: Install wasm-tools
+        run: |
+          sudo apt-get update && sudo apt-get install -y wabt
+      - name: Check wasm size budget
+        run: bash scripts/check_wasm_size.sh
