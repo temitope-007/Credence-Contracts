@@ -157,6 +157,9 @@ pub enum ContractError {
     /// Contracts: bond
     /// Wire-stable: do not renumber this error code.
     SlashExceedsBond = 203,
+    /// Storage cap for attestations or slash history reached.
+    /// Replaces: panic!("storage cap reached")
+    StorageCapReached = 218,
 
     /// Bond lock-up period has not yet expired.
     /// Replaces: panic!("use withdraw for post lock-up")

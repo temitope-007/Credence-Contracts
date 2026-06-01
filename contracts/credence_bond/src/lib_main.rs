@@ -14,6 +14,7 @@ use soroban_sdk::{
     contract, contractimpl, contracttype, panic_with_error, Address, Env, IntoVal, String, Symbol,
     Val, Vec,
 };
+use crate::parameters::{MAX_ATTESTATIONS, MAX_SLASH_RECORDS};
 
 /// Identity tier based on bonded amount.
 #[contracttype]
@@ -431,6 +432,10 @@ impl CredenceBond {
             .instance()
             .get(&subject_key)
             .unwrap_or(Vec::new(&e));
+        // Enforce storage cap for attestations per subject
+        if attestations.len() as u32 >= MAX_ATTESTATIONS {
+            panic_with_error!(e, ContractError::StorageCapReached);
+        }
         attestations.push_back(id);
         e.storage().instance().set(&subject_key, &attestations);
 

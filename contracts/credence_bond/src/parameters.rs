@@ -70,6 +70,10 @@ pub const MIN_SLASH_COOLDOWN_SECS: u64 = 0;
 pub const MAX_SLASH_COOLDOWN_SECS: u64 = 604_800;
 /// Default slash cooldown period in seconds (24 hours)
 pub const DEFAULT_SLASH_COOLDOWN_SECS: u64 = 86_400;
+/// Maximum number of attestations per subject (ledger entry cap)
+pub const MAX_ATTESTATIONS: u32 = 1_000;
+/// Maximum number of slash history records per identity (ledger entry cap)
+pub const MAX_SLASH_RECORDS: u32 = 1_000;
 
 /// Minimum bronze tier threshold (0 = no minimum)
 pub const MIN_BRONZE_THRESHOLD: i128 = 0;
