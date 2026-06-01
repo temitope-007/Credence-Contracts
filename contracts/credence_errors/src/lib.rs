@@ -381,6 +381,15 @@ pub enum ContractError {
     /// Wire-stable: do not renumber this error code.
     VerificationFailed = 511,
 
+    /// Unknown or unsupported signature scheme tag.
+    UnknownScheme = 508,
+    /// Verifier already registered for the given scheme tag.
+    VerifierAlreadyRegistered = 509,
+    /// No verifier registered for the given scheme tag.
+    VerifierNotRegistered = 510,
+    /// Signature verification failed for the given scheme and payload.
+    VerificationFailed = 511,
+
     // --- Treasury (600-699) ---
     /// Amount argument must be strictly positive (> 0).
     /// Replaces: panic!("amount must be positive")
@@ -594,6 +603,16 @@ impl ErrorExt for ContractError {
             ContractError::AlreadyRevoked => "Delegation has already been revoked",
             ContractError::DelegationExpiryTooLong => {
                 "Delegation expiry exceeds the maximum allowed lifetime"
+            }
+            ContractError::UnknownScheme => "Unknown or unsupported signature scheme tag",
+            ContractError::VerifierAlreadyRegistered => {
+                "Verifier already registered for the given scheme tag"
+            }
+            ContractError::VerifierNotRegistered => {
+                "No verifier registered for the given scheme tag"
+            }
+            ContractError::VerificationFailed => {
+                "Signature verification failed for the given scheme and payload"
             }
             ContractError::AmountMustBePositive => "Amount must be strictly positive (> 0)",
             ContractError::ThresholdExceedsSigners => {
