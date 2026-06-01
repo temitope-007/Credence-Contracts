@@ -26,6 +26,8 @@ fn test_slash_next_ledger_after_increase_bond_allowed() {
     assert_eq!(bond.bonded_amount, 11_000);
 }
 
+/// THREAT: T-024
+/// Validates same-ledger guard prevents sandwich attack: slash after collateral increase is rejected.
 #[test]
 #[should_panic(expected = "slash blocked: collateral increased in this ledger")]
 fn test_slash_same_ledger_after_create_bond_rejected() {

@@ -36,6 +36,8 @@ fn assert_pause_invariant(env: &Env, client: &CredenceDelegationClient<'_>, addr
     });
 }
 
+/// THREAT: T-030
+/// Validates pause signer invariant: stored count matches actual signers (prevents unauthorized pause).
 #[test]
 fn test_idempotent_add_remove_pause_signer_invariant() {
     let (env, admin, client) = setup();

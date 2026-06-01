@@ -104,6 +104,8 @@ fn test_slash_entire_amount() {
 // Category 2: Authorization and Security
 // ============================================================================
 
+/// THREAT: T-001
+/// Ensures only admin can slash bonds via authorization check.
 #[test]
 #[should_panic(expected = "not admin")]
 fn test_slash_unauthorized_rejection() {
@@ -143,6 +145,8 @@ fn test_slash_identity_cannot_slash_own_bond() {
 // Category 3: Over-Slash Prevention (Capping Behavior)
 // ============================================================================
 
+/// THREAT: T-007
+/// Ensures slashed amount never exceeds bonded amount (invariant I2).
 #[test]
 fn test_slash_over_amount_capped() {
     let e = Env::default();

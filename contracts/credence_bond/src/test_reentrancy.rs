@@ -363,6 +363,8 @@ fn test_withdraw_reentrancy_blocked() {
 // ===========================================================================
 // 2. Reentrancy in slashing — SHOULD be blocked
 // ===========================================================================
+/// THREAT: T-010
+/// Ensures reentrancy guard prevents double-slash attacks via reentry.
 #[test]
 #[should_panic(expected = "HostError")]
 fn test_slash_reentrancy_blocked() {
@@ -382,6 +384,8 @@ fn test_slash_reentrancy_blocked() {
 // ===========================================================================
 // 3. Reentrancy in fee collection — MUST be blocked
 // ===========================================================================
+/// THREAT: T-009
+/// Validates reentrancy guard prevents fee collection reentry attacks.
 #[test]
 #[should_panic(expected = "HostError")]
 fn test_fee_collection_reentrancy_blocked() {

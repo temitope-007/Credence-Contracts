@@ -96,6 +96,8 @@ fn test_set_supply_cap_negative() {
     client.set_supply_cap(&admin, &-1000_i128);
 }
 
+/// THREAT: T-021
+/// Validates supply cap is enforced when creating bonds.
 #[test]
 fn test_supply_cap_enforcement_below_cap() {
     let e = Env::default();
@@ -115,6 +117,8 @@ fn test_supply_cap_enforcement_below_cap() {
     assert_eq!(client.get_total_supply(), 5000_i128);
 }
 
+/// THREAT: T-021
+/// Ensures supply cap prevents excessive total bonded amount across all identities.
 #[test]
 #[should_panic(expected = "supply cap exceeded")]
 fn test_supply_cap_enforcement_above_cap() {

@@ -96,6 +96,8 @@ fn count_access_denied_events(e: &Env, contract_id: &Address, role: &str, code: 
         .count() as u32
 }
 
+/// THREAT: T-001
+/// Validates that role-based access control prevents unauthorized admin operations.
 #[test]
 fn test_require_admin_success() {
     let e = Env::default();
@@ -104,6 +106,8 @@ fn test_require_admin_success() {
     client.require_admin_only(&admin);
 }
 
+/// THREAT: T-001
+/// Ensures unauthorized users cannot call admin-only methods.
 #[test]
 #[should_panic(expected = "InvalidAction")]
 fn test_require_admin_unauthorized() {
