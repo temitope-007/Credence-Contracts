@@ -16,7 +16,7 @@
 
 use credence_errors::ContractError;
 use soroban_sdk::panic_with_error;
-use soroban_sdk::{contract, contractimpl, contracttype, Address, Env, Symbol};
+use soroban_sdk::{contract, contractimpl, contracttype, Address, Env, Symbol, Vec};
 
 pub mod domain;
 pub mod nonce;
@@ -24,6 +24,7 @@ pub mod pausable;
 pub mod verifier;
 
 pub use domain::{DelegatedActionPayload, DomainTag};
+pub use pausable::PauseProposalView;
 pub use verifier::SchemeTag;
 
 // ---------------------------------------------------------------------------
@@ -31,7 +32,7 @@ pub use verifier::SchemeTag;
 // ---------------------------------------------------------------------------
 
 #[contracttype]
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum DelegationType {
     Attestation,
     Management,
@@ -473,14 +474,14 @@ impl CredenceDelegation {
         }
 
         // Validate scheme is known
-        verifier::validate_scheme_registered(&e, scheme as u8);
+        verifier::validate_scheme_registered(&e, scheme);
 
         // Register the verifier
         let key = DataKey::Verifier(scheme);
         e.storage().instance().set(&key, &verifier_id);
 
         // Emit audit event
-        verifier::emit_verifier_registered(&e, scheme as u8, &verifier_id, &admin);
+        verifier::emit_verifier_registered(&e, scheme, &verifier_id, &admin);
 
         e.events().publish(
             (Symbol::new(&e, "verifier_registered"), scheme),
@@ -498,7 +499,7 @@ impl CredenceDelegation {
     pub fn get_verifier(e: Env, scheme: u32) -> Option<Address> {
         e.storage()
             .instance()
-            .get(&DataKey::Verifier(scheme as u8))
+            .get(&DataKey::Verifier(scheme))
     }
 
     // -----------------------------------------------------------------------
@@ -531,6 +532,24 @@ impl CredenceDelegation {
 
     pub fn execute_pause_proposal(e: Env, proposal_id: u64) {
         pausable::execute_pause_proposal(&e, proposal_id)
+    }
+
+    /// Read-only, structured view of an in-flight (or executed) pause proposal,
+    /// for operator monitoring. Aggregates the four proposal storage entries
+    /// (counter, action payload, per-signer approvals, approval count) into a
+    /// single [`PauseProposalView`].
+    ///
+    /// Performs no `require_auth` and mutates nothing — safe to expose publicly.
+    ///
+    /// `signers` is the candidate set used to resolve `approved_by`; pass the
+    /// addresses you want checked (Soroban storage cannot enumerate keys). The
+    /// `action`, `approvals`, and `executed` fields are independent of it.
+    pub fn get_pause_proposal_state(
+        e: Env,
+        proposal_id: u64,
+        signers: Vec<Address>,
+    ) -> PauseProposalView {
+        pausable::get_pause_proposal_state(&e, proposal_id, &signers)
     }
 
     // -----------------------------------------------------------------------
@@ -660,6 +679,9 @@ impl CredenceDelegation {
 
 #[cfg(test)]
 mod test_delegation_ttl;
+
+#[cfg(test)]
+mod test_pause_proposal_view;
 
 #[cfg(test)]
 mod test_expiry_boundary;

@@ -1,5 +1,5 @@
 use credence_errors::ContractError;
-use soroban_sdk::{panic_with_error, Address, Env, Symbol};
+use soroban_sdk::{contracttype, panic_with_error, Address, Env, Symbol, Vec};
 
 use crate::DataKey;
 
@@ -8,6 +8,34 @@ use crate::DataKey;
 pub enum PauseAction {
     Pause = 1,
     Unpause = 2,
+}
+
+/// Read-only aggregated snapshot of a single pause proposal, for operator
+/// monitoring dashboards.
+///
+/// This struct is the typed result of [`get_pause_proposal_state`], which
+/// **aggregates four distinct storage entries** into one read:
+/// * [`DataKey::PauseProposalCounter`] — to tell an allocated id from one that
+///   was never issued (and so derive `executed`).
+/// * [`DataKey::PauseProposal`] — the proposed action payload.
+/// * [`DataKey::PauseApproval`] — the per-signer approval flags.
+/// * [`DataKey::PauseApprovalCount`] — the running approval tally.
+#[contracttype]
+#[derive(Clone, Debug, PartialEq)]
+pub struct PauseProposalView {
+    /// The proposal id this view describes (echoes the query argument).
+    pub proposal_id: u64,
+    /// Proposed action: `1` = Pause, `2` = Unpause, `0` = no live payload
+    /// (the proposal was never allocated, or has already been executed/cleared).
+    pub action: u32,
+    /// Number of distinct signer approvals recorded for the proposal.
+    pub approvals: u32,
+    /// The subset of the caller-supplied `signers` that have approved. See
+    /// [`get_pause_proposal_state`] for why the candidate set must be supplied.
+    pub approved_by: Vec<Address>,
+    /// `true` when the id was allocated by the counter but its payload is gone —
+    /// i.e. the proposal has been executed (or otherwise cleared).
+    pub executed: bool,
 }
 
 fn require_admin_auth(e: &Env, admin: &Address) {
@@ -305,4 +333,66 @@ fn do_unpause(e: &Env, proposal_id: Option<u64>) {
     e.storage().instance().set(&DataKey::Paused, &false);
     e.events()
         .publish((Symbol::new(e, "unpaused"),), proposal_id);
+}
+
+/// Aggregate the full state of a pause proposal into a single typed view.
+///
+/// This is **read-only**: it performs no `require_auth` and never mutates
+/// storage, so it is safe to expose as a public entrypoint. It combines the
+/// four proposal-related storage entries (see [`PauseProposalView`]).
+///
+/// `signers` is the candidate set used to populate `approved_by`. Soroban
+/// instance storage is a key/value map with no key enumeration, and the
+/// contract keeps no list of approvers — only per-`(proposal, signer)` flags.
+/// The view therefore cannot discover approvers on its own; the caller passes
+/// the addresses it wants resolved (operators already track their signer set).
+/// Passing an empty vector yields an empty `approved_by` while still returning
+/// the action/approvals/executed fields, which do not depend on `signers`.
+///
+/// Field derivation:
+/// * `action` is `0` when no live payload exists for `proposal_id`.
+/// * `executed` is `true` when the id is below the counter (it was allocated)
+///   yet has no live payload (it was executed/cleared). A never-allocated id
+///   (`proposal_id >= PauseProposalCounter`) reports `action = 0, executed =
+///   false`.
+pub fn get_pause_proposal_state(
+    e: &Env,
+    proposal_id: u64,
+    signers: &Vec<Address>,
+) -> PauseProposalView {
+    let store = e.storage().instance();
+
+    // Read 1: the counter, to distinguish allocated-then-cleared ids from
+    // ids that were never issued.
+    let counter: u64 = store.get(&DataKey::PauseProposalCounter).unwrap_or(0);
+
+    // Read 2: the action payload. Absent (0) once executed or if never created.
+    let action: u32 = store.get(&DataKey::PauseProposal(proposal_id)).unwrap_or(0);
+    let has_payload = action != 0;
+
+    // Read 3: the approval count.
+    let approvals: u32 = store
+        .get(&DataKey::PauseApprovalCount(proposal_id))
+        .unwrap_or(0);
+
+    // Read 4: per-signer approval flags, resolved across the supplied set.
+    let mut approved_by = Vec::new(e);
+    for signer in signers.iter() {
+        let approved: bool = store
+            .get(&DataKey::PauseApproval(proposal_id, signer.clone()))
+            .unwrap_or(false);
+        if approved {
+            approved_by.push_back(signer);
+        }
+    }
+
+    let executed = proposal_id < counter && !has_payload;
+
+    PauseProposalView {
+        proposal_id,
+        action,
+        approvals,
+        approved_by,
+        executed,
+    }
 }
