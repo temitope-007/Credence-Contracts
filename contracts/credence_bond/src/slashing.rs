@@ -384,4 +384,3 @@ pub fn slash_bond_with_identity(
 ) -> crate::IdentityBond {
     slash_bond(e, admin, slash_amount)
 }
-

@@ -1669,10 +1669,10 @@ mod tests {
 mod test_bond_drift;
 
 #[cfg(test)]
-pub mod fork_ours;
-#[cfg(test)]
 pub mod fork_base;
 #[cfg(test)]
-pub mod fork_theirs;
-#[cfg(test)]
 pub mod fork_divergent;
+#[cfg(test)]
+pub mod fork_ours;
+#[cfg(test)]
+pub mod fork_theirs;

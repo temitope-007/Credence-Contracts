@@ -1,11 +1,10 @@
-use crate::{IdentityBond, DataKey, BondTier, Attestation};
 use crate::types::AttestationDedupKey;
 use crate::{early_exit_penalty, nonce, rolling_bond, slashing, tiered_bond, weighted_attestation};
+use crate::{Attestation, BondTier, DataKey, IdentityBond};
 
 use credence_errors::ContractError;
 use soroban_sdk::{
-    contract, contractimpl, contracttype, panic_with_error, Address, Env, String, Symbol,
-    Val, Vec,
+    contract, contractimpl, contracttype, panic_with_error, Address, Env, String, Symbol, Val, Vec,
 };
 
 // Re-export attestation type (definitions and validation in types::attestation).
@@ -539,7 +538,12 @@ impl CredenceBond {
         bump_instance_ttl(&e);
         e.events().publish(
             (Symbol::new(&e, "bond_topped_up"),),
-            (bond.identity.clone(), old_amount, bond.bonded_amount, timestamp),
+            (
+                bond.identity.clone(),
+                old_amount,
+                bond.bonded_amount,
+                timestamp,
+            ),
         );
         bond
     }
@@ -569,7 +573,12 @@ impl CredenceBond {
         bump_instance_ttl(&e);
         e.events().publish(
             (Symbol::new(&e, "bond_duration_extended"),),
-            (bond.identity.clone(), old_duration, bond.bond_duration, timestamp),
+            (
+                bond.identity.clone(),
+                old_duration,
+                bond.bond_duration,
+                timestamp,
+            ),
         );
         bond
     }

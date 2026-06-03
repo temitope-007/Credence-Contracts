@@ -1,6 +1,6 @@
 //! Storage migration utilities for IdentityBond
+use crate::{DataKey, IdentityBond};
 use soroban_sdk::Env;
-use crate::{IdentityBond, DataKey};
 
 /// Perform lazy migration of IdentityBond storage from v1 to v2 format.
 ///

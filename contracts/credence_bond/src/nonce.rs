@@ -1,5 +1,5 @@
 //! Nonce tracking for replay prevention in the credence bond contract.
-//! 
+//!
 //! Safety buffer added on top of the nonce TTL.
 const MIN_NONCE_TTL: u32 = 518_400;
 
@@ -127,5 +127,7 @@ pub fn validate_and_consume_with_grace(
 }
 
 fn bump_nonce_ttl(e: &Env, key: &DataKey, _ttl: u32) {
-    e.storage().instance().extend_ttl(MIN_NONCE_TTL, MIN_NONCE_TTL * 2);
+    e.storage()
+        .instance()
+        .extend_ttl(MIN_NONCE_TTL, MIN_NONCE_TTL * 2);
 }

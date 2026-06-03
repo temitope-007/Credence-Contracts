@@ -59,7 +59,9 @@ const SKIP_SLASH_INVARIANT: bool = cfg!(skip_slash_invariant);
 /// `initialize`). Callers that require a bond should use [`load_bond`].
 pub fn try_load_bond(env: &Env, contract: &Address) -> Option<IdentityBond> {
     env.as_contract(contract, || {
-        env.storage().instance().get::<_, IdentityBond>(&DataKey::Bond)
+        env.storage()
+            .instance()
+            .get::<_, IdentityBond>(&DataKey::Bond)
     })
 }
 
@@ -83,7 +85,11 @@ pub fn load_bond(env: &Env, contract: &Address) -> IdentityBond {
 /// when summed as a signed integer.
 ///
 /// Owner module: `SubjectAttestationCount` / `weighted_attestation`.
-pub fn assert_attestation_weight_sum_non_negative(env: &Env, contract: &Address, subject: &Address) {
+pub fn assert_attestation_weight_sum_non_negative(
+    env: &Env,
+    contract: &Address,
+    subject: &Address,
+) {
     let sum = attestation_weight_sum(env, contract, subject);
     assert!(
         sum >= 0,

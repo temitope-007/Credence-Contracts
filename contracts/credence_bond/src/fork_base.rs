@@ -1,5 +1,5 @@
-use crate::{IdentityBond, DataKey, BondTier};
 use crate::{early_exit_penalty, rolling_bond, tiered_bond};
+use crate::{BondTier, DataKey, IdentityBond};
 
 use credence_errors::ContractError;
 use soroban_sdk::{
@@ -132,7 +132,9 @@ impl CredenceBond {
 
         let counter_key = DataKey::AttestationCounter;
         let id: u64 = e.storage().instance().get(&counter_key).unwrap_or(0);
-        let next_id = id.checked_add(1).unwrap_or_else(|| panic_with_error!(e, ContractError::Overflow));
+        let next_id = id
+            .checked_add(1)
+            .unwrap_or_else(|| panic_with_error!(e, ContractError::Overflow));
         e.storage().instance().set(&counter_key, &next_id);
 
         let attestation = Attestation {

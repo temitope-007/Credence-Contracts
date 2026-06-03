@@ -35,11 +35,17 @@ fn main() -> ExitCode {
 
     let regressions = harness::diff(&baseline, &current);
     if regressions.is_empty() {
-        println!("\n✓ no gas regressions (tolerance {:.1}%)", baseline.tolerance_pct);
+        println!(
+            "\n✓ no gas regressions (tolerance {:.1}%)",
+            baseline.tolerance_pct
+        );
         return ExitCode::SUCCESS;
     }
 
-    eprintln!("\n✗ gas regression(s) over {:.1}% tolerance:", baseline.tolerance_pct);
+    eprintln!(
+        "\n✗ gas regression(s) over {:.1}% tolerance:",
+        baseline.tolerance_pct
+    );
     for r in &regressions {
         eprintln!(
             "  {}::{}  {} -> {}  (+{:.1}%)",
@@ -63,7 +69,9 @@ fn print_table(
         "entrypoint", "cpu_insns", "Δ cpu", "rw(r/w)"
     );
     for name in harness::ENTRYPOINTS {
-        let Some(c) = current.get(*name) else { continue };
+        let Some(c) = current.get(*name) else {
+            continue;
+        };
         let delta = baseline
             .costs
             .get(*name)

@@ -1,5 +1,5 @@
-use crate::{IdentityBond, DataKey, BondTier};
 use crate::{early_exit_penalty, rolling_bond, tiered_bond};
+use crate::{BondTier, DataKey, IdentityBond};
 
 use credence_errors::ContractError;
 use soroban_sdk::{

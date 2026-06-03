@@ -70,8 +70,8 @@ fn bond_drift_slashed_over_bonded_emits_structured_event() {
     }));
     assert!(panic_result.is_err(), "expected InvariantViolation panic");
 
-    let (kind, bonded, slashed, _count, _list_len) = last_bond_drift_event(&e)
-        .expect("bond_drift_detected event must be emitted before panic");
+    let (kind, bonded, slashed, _count, _list_len) =
+        last_bond_drift_event(&e).expect("bond_drift_detected event must be emitted before panic");
     assert_eq!(kind, BondDriftKind::SlashedExceedsBonded);
     assert_eq!(bonded, 1_000);
     assert_eq!(slashed, 1_100);

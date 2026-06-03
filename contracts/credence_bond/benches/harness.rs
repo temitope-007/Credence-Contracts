@@ -257,7 +257,9 @@ impl<'a> Reader<'a> {
         while self.b[self.i] != b'"' {
             self.i += 1;
         }
-        let s = std::str::from_utf8(&self.b[start..self.i]).unwrap().to_string();
+        let s = std::str::from_utf8(&self.b[start..self.i])
+            .unwrap()
+            .to_string();
         self.i += 1; // consume closing '"'
         s
     }
@@ -300,8 +302,14 @@ pub struct Baseline {
 
 /// Parse a baseline JSON document produced by [`to_json`].
 pub fn parse_baseline(text: &str) -> Baseline {
-    let root = Reader { b: text.as_bytes(), i: 0 }.value();
-    let tolerance_pct = obj_get(&root, "tolerance_pct").map(as_num).unwrap_or(TOLERANCE_PCT);
+    let root = Reader {
+        b: text.as_bytes(),
+        i: 0,
+    }
+    .value();
+    let tolerance_pct = obj_get(&root, "tolerance_pct")
+        .map(as_num)
+        .unwrap_or(TOLERANCE_PCT);
     let mut costs = BTreeMap::new();
     if let Some(Json::Obj(entries)) = obj_get(&root, "entrypoints") {
         for (name, c) in entries {
@@ -318,7 +326,10 @@ pub fn parse_baseline(text: &str) -> Baseline {
             );
         }
     }
-    Baseline { tolerance_pct, costs }
+    Baseline {
+        tolerance_pct,
+        costs,
+    }
 }
 
 /// A single metric that grew past the tolerance.
@@ -345,7 +356,11 @@ pub fn diff(baseline: &Baseline, current: &BTreeMap<String, EntryCost>) -> Vec<R
             ("cpu_insns", b.cpu_insns, c.cpu_insns),
             ("mem_bytes", b.mem_bytes, c.mem_bytes),
             ("read_entries", b.read_entries as i64, c.read_entries as i64),
-            ("write_entries", b.write_entries as i64, c.write_entries as i64),
+            (
+                "write_entries",
+                b.write_entries as i64,
+                c.write_entries as i64,
+            ),
             ("read_bytes", b.read_bytes as i64, c.read_bytes as i64),
             ("write_bytes", b.write_bytes as i64, c.write_bytes as i64),
         ];

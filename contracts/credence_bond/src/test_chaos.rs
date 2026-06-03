@@ -122,7 +122,10 @@ mod tests {
         let bond = client.get_identity_state();
         assert_eq!(bond.slashed_amount, 0, "slashed_amount must revert to 0");
         assert_eq!(bond.bonded_amount, 1000, "bonded_amount must be unchanged");
-        assert!(!client.is_locked(), "lock must be released after atomic revert");
+        assert!(
+            !client.is_locked(),
+            "lock must be released after atomic revert"
+        );
     }
 
     // ── Injection #2 ─────────────────────────────────────────────────────────
@@ -142,11 +145,17 @@ mod tests {
         assert!(client.get_identity_state().active);
 
         let result = client.try_withdraw_bond(&identity);
-        assert!(result.is_err(), "withdraw_bond must fail when callback panics");
+        assert!(
+            result.is_err(),
+            "withdraw_bond must fail when callback panics"
+        );
 
         // INVARIANT
         let bond = client.get_identity_state();
-        assert!(bond.active, "bond must remain active after callback-induced rollback");
+        assert!(
+            bond.active,
+            "bond must remain active after callback-induced rollback"
+        );
         assert_eq!(bond.bonded_amount, 1000, "bonded_amount must not be zeroed");
         assert!(!client.is_locked(), "lock must be released");
     }
@@ -173,7 +182,10 @@ mod tests {
 
         // collect_fees: zeros fee storage, calls on_collect → panic → rollback.
         let result = client.try_collect_fees(&admin);
-        assert!(result.is_err(), "collect_fees must fail when callback panics");
+        assert!(
+            result.is_err(),
+            "collect_fees must fail when callback panics"
+        );
 
         // INVARIANT: fees must be intact. Verify via a clean second call.
         let noop = e.register(NoOpCallback, ());

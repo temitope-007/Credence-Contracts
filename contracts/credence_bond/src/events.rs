@@ -452,4 +452,3 @@ pub fn emit_bond_drift_detected(e: &Env, details: &crate::invariants::BondDriftD
     );
     e.events().publish(topics, data);
 }
-
