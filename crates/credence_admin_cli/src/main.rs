@@ -1,6 +1,6 @@
 use anyhow::{anyhow, Result};
 use clap::{Parser, Subcommand};
-use soroban_client::{Client, Transaction, XdrCodec};
+use soroban_client::{Options, Server};
 
 /// CLI for Credence admin operations.
 #[derive(Parser)]
@@ -11,6 +11,9 @@ use soroban_client::{Client, Transaction, XdrCodec};
     about = "Admin CLI for Credence protocol"
 )]
 struct Cli {
+    /// Soroban RPC endpoint to connect to.
+    #[arg(long, default_value = "https://soroban-testnet.stellar.org")]
+    rpc_url: String,
     /// Submit the transaction instead of dry run.
     #[arg(long, action = clap::ArgAction::SetTrue, default_value = "false")]
     submit: bool,
@@ -39,77 +42,73 @@ enum Commands {
 
 fn main() -> Result<()> {
     let cli = Cli::parse();
-    // Initialize Soroban client (placeholder – replace with real network config).
-    let client = Client::new("https://testnet.soroban.org")?;
+    // Connect to the Soroban RPC. `Server` is the entry point for the
+    // soroban-client SDK (v0.5). Transaction assembly/submission for each
+    // admin operation is intentionally left as a follow-up: it requires a
+    // signing keypair, source-account lookup and contract-invocation XDR that
+    // are out of scope for this scaffold.
+    let server = Server::new(&cli.rpc_url, Options::default())
+        .map_err(|e| anyhow!("failed to connect to RPC {}: {:?}", cli.rpc_url, e))?;
+
     match cli.command {
         Commands::BondSetEarlyExitConfig { bond_id, bps } => {
-            handle_bond_set_early_exit(&client, &bond_id, bps, cli.submit)
+            handle_bond_set_early_exit(&server, &bond_id, bps, cli.submit)
         }
         Commands::BondSetWeights { bond_id, weight } => {
-            handle_bond_set_weights(&client, &bond_id, weight, cli.submit)
+            handle_bond_set_weights(&server, &bond_id, weight, cli.submit)
         }
         Commands::DelegationSetPauseSigner {
             delegation_id,
             signer,
-        } => handle_delegation_set_pause(&client, &delegation_id, &signer, cli.submit),
+        } => handle_delegation_set_pause(&server, &delegation_id, &signer, cli.submit),
+    }
+}
+
+fn report(action: &str, submit: bool) -> Result<()> {
+    if submit {
+        // Submitting requires building and signing the invocation transaction,
+        // which is not yet wired up in this scaffold.
+        Err(anyhow!(
+            "submit is not yet implemented for `{action}`; rerun without --submit for a dry run"
+        ))
+    } else {
+        println!("Dry run: would execute `{action}`");
+        Ok(())
     }
 }
 
 fn handle_bond_set_early_exit(
-    client: &Client,
+    _server: &Server,
     bond_id: &str,
     bps: u32,
     submit: bool,
 ) -> Result<()> {
-    // Build transaction (placeholder implementation).
-    let tx = Transaction::new();
-    // Encode XDR.
-    let xdr = tx.to_xdr()?.map_err(|e| anyhow!(e))?;
-    if submit {
-        client.submit_transaction(&tx)?;
-        println!(
-            "Transaction submitted for bond {} early exit config",
-            bond_id
-        );
-    } else {
-        println!("Dry run XDR: {}", base64::encode(&xdr));
-    }
-    Ok(())
+    report(
+        &format!("bond {bond_id} set-early-exit-config bps={bps}"),
+        submit,
+    )
 }
 
 fn handle_bond_set_weights(
-    client: &Client,
+    _server: &Server,
     bond_id: &str,
     weight: u32,
     submit: bool,
 ) -> Result<()> {
-    let tx = Transaction::new();
-    let xdr = tx.to_xdr()?.map_err(|e| anyhow!(e))?;
-    if submit {
-        client.submit_transaction(&tx)?;
-        println!("Transaction submitted for bond {} weight config", bond_id);
-    } else {
-        println!("Dry run XDR: {}", base64::encode(&xdr));
-    }
-    Ok(())
+    report(
+        &format!("bond {bond_id} set-weights weight={weight}"),
+        submit,
+    )
 }
 
 fn handle_delegation_set_pause(
-    client: &Client,
+    _server: &Server,
     delegation_id: &str,
     signer: &str,
     submit: bool,
 ) -> Result<()> {
-    let tx = Transaction::new();
-    let xdr = tx.to_xdr()?.map_err(|e| anyhow!(e))?;
-    if submit {
-        client.submit_transaction(&tx)?;
-        println!(
-            "Transaction submitted for delegation {} pause signer",
-            delegation_id
-        );
-    } else {
-        println!("Dry run XDR: {}", base64::encode(&xdr));
-    }
-    Ok(())
+    report(
+        &format!("delegation {delegation_id} set-pause-signer signer={signer}"),
+        submit,
+    )
 }

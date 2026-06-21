@@ -224,7 +224,7 @@ mod tests {
         Address, BytesN, Env,
     };
 
-    fn setup_env() -> (Env, TimelockContractClient, Address) {
+    fn setup_env() -> (Env, TimelockContractClient<'static>, Address) {
         let env = Env::default();
         env.mock_all_auths();
         let admin = Address::generate(&env);
