@@ -337,6 +337,17 @@ pub fn initialize_slashed_pool(e: &Env) {
         .set(&Symbol::new(e, KEY_SLASHED_FUNDS_POOL), &0_i128);
 }
 
+/// Wrapper that accepts an identity parameter for backward compatibility with fork variants.
+#[allow(dead_code)]
+pub fn slash_bond_with_identity(
+    e: &Env,
+    admin: &Address,
+    _identity: &Address,
+    slash_amount: i128,
+) -> crate::IdentityBond {
+    slash_bond(e, admin, slash_amount)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -353,7 +364,7 @@ mod tests {
         assert!(!is_fully_slashed(1000, 0));
         assert!(!is_fully_slashed(1000, 500));
         assert!(is_fully_slashed(1000, 1000));
-        assert!(is_fully_slashed(1000, 1500)); // Over-slashed
+        assert!(is_fully_slashed(1000, 1500));
     }
 
     #[test]
@@ -365,23 +376,10 @@ mod tests {
 
     #[test]
     fn test_available_balance_with_slashing() {
-        // Verify available balance calculation
         let available = get_available_balance(1000, 300);
         assert_eq!(available, 700);
 
-        // Fully slashed
         let available_full = get_available_balance(1000, 1000);
         assert_eq!(available_full, 0);
     }
-}
-
-/// Wrapper that accepts an identity parameter for backward compatibility with fork variants.
-#[allow(dead_code)]
-pub fn slash_bond_with_identity(
-    e: &Env,
-    admin: &Address,
-    _identity: &Address,
-    slash_amount: i128,
-) -> crate::IdentityBond {
-    slash_bond(e, admin, slash_amount)
 }
