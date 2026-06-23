@@ -1710,6 +1710,11 @@ mod tests {
 #[cfg(test)]
 mod test_bond_drift;
 
+/// Precision-loss regression tests for the early-exit penalty time-decay
+/// formula (dust-amount zero-penalty exploit).
+#[cfg(test)]
+mod test_early_exit_precision;
+
 /// Deliberately-divergent contract used by `test_differential` to verify the
 /// harness detects behavioural divergence.  Never shipped to mainnet.
 #[cfg(test)]
