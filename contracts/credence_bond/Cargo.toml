@@ -30,11 +30,13 @@ harness = false
 test = false
 required-features = ["gas-bench"]
 
-# Explicit baseline refresher: `cargo run -p credence_bond --bin update-cost-baseline`.
+# Baseline refresher & diff reporter. Run with
+# `cargo run -p credence_bond --features gas-bench --bin update-cost-baseline`.
 [[bin]]
 name = "update-cost-baseline"
 path = "benches/update_cost_baseline.rs"
 test = false
+required-features = ["gas-bench"]
 
 [dependencies]
 credence_errors = { path = "../credence_errors" }
@@ -48,4 +50,4 @@ unexpected_cfgs = { level = "warn", check-cfg = ['cfg(skip_slash_invariant)'] }
 
 [features]
 default = []
-gas-bench = []
+gas-bench = ["soroban-sdk/testutils"]

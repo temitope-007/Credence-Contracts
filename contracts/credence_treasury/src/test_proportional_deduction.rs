@@ -39,7 +39,7 @@ mod tests {
         #[test]
         fn proportional_deduction_two_source(source_a in 0i128..=1_000_000_000,
                                              source_b in 0i128..=1_000_000_000,
-                                             amount in 0i128..=1_000_000_000) {
+                                             amount in 0i128..=2_000_000_000) {
             let total = source_a + source_b;
             // Avoid division by zero and amount > total (invariant not defined).
             if total == 0 || amount > total { return Ok(()); }

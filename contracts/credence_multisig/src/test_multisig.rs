@@ -1,6 +1,8 @@
+extern crate std;
+
 use crate::{ActionType, CredenceMultiSig, CredenceMultiSigClient, ProposalStatus};
 use soroban_sdk::{
-    testutils::{Address as _, Ledger},
+    testutils::{Address as _, Events, Ledger},
     Address, BytesN, Env, String, Vec,
 };
 
